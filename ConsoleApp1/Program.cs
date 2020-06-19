@@ -34,7 +34,7 @@ namespace ConsoleApp1
             var greeter = system.ActorOf<MainActor>("MainActor");
             greeter.Tell(new TaskMessage(new YandexParserSettings(query) { EndPoint = page }));
 
-            Console.ReadLine();
+            Console.ReadLine(); 
         }
 
         private static void MainActor_OnNewData(string obj)
