@@ -8,12 +8,20 @@ namespace ParserLib.Actor
 {
     public class WebActor : ReceiveActor
     {
+        /// <summary>
+        /// Контейнер содержит cookie, чтобы не вводить капчу при каждом запросе.
+        /// </summary>
         private CookieContainer container = new CookieContainer();
         public WebActor()
         {
+            //Регистрация обработчиков входящих сообщений
             Receive<WebMessage>(WebMessageHandler);
         }
 
+        /// <summary>
+        /// Загружает страницу переданную в сообщении
+        /// </summary>
+        /// <param name="message">Неизменяемое сообщение, содержащее URL страницы для загрузки</param>
         private void WebMessageHandler(WebMessage message)
         {
             string result = null;

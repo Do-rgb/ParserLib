@@ -10,8 +10,18 @@ namespace ParserLib.Actor
 {
     public class ParserActor<T> : ReceiveActor where T : class
     {
+        /// <summary>
+        /// Ссылка на WebActor, используется для отправки сообщений актору
+        /// </summary>
         protected IActorRef _webActor = Context.ActorOf<WebActor>("WebActor");
+        /// <summary>
+        /// Преобразует текст в DOM объекты
+        /// </summary>
         HtmlParser domParser = new HtmlParser();
+
+        /// <summary>
+        /// Парсер обрабатывающий загруженную страницу
+        /// </summary>
         IParser<T> _parser;
 
         public ParserActor(IParser<T> parser)
@@ -22,11 +32,10 @@ namespace ParserLib.Actor
             Receive<BadResponseMessage>(BadResponseMessageHandler);
         }
 
-        public static Props Props(IParser<T> parser)
-        {
-            return Akka.Actor.Props.Create(() => new ParserActor<T>(parser));
-        }
-
+        /// <summary>
+        /// Обрабатывает событие, при удачном запросе
+        /// </summary>
+        /// <param name="message">Содержит URL и контент загруженной страницы</param>
         private void GoodResponseMessageHandler(GoodResponseMessage message)
         {
             var document = domParser.ParseDocument(message.Response);
@@ -34,11 +43,19 @@ namespace ParserLib.Actor
             Context.Parent.Tell(new ParserResultMessage<T>(message.Url, result));
         }
 
+        /// <summary>
+        /// Обрабатывает событие, при НЕ удачном запросе
+        /// </summary>
+        /// <param name="message">Содержит URL неудачного запроса</param>
         private void BadResponseMessageHandler(BadResponseMessage message)
         {
             Context.Parent.Tell(new ParserResultMessage<T>(message.Url,null));
         }
 
+        /// <summary>
+        /// Обработчик входящего сообщения. Запускает работу парсера.
+        /// </summary>
+        /// <param name="message">Содержит информацию о страницах для парсинга</param>
         private void TaskMessageHandler(TaskMessage message)
         {
             var startPoint = message.Settings.StartPoint;
